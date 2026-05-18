@@ -21,6 +21,7 @@ int main(int argc, char *argv[], char **envp)
 	ssize_t command;
 	pid_t pid;
 	int status;
+	char *c_argv[2];
 	(void)argc;
 
 	while (1)
@@ -46,7 +47,6 @@ int main(int argc, char *argv[], char **envp)
 		if (lineptr[0] == '\0')
 			continue;
 
-		char *c_argv[2];
 		c_argv[0] = lineptr;
 		c_argv[1] = NULL;
 
