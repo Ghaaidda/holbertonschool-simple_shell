@@ -51,7 +51,6 @@ int main(int argc, char *argv[], char **envp)
 		c_argv[1] = NULL;
 
 		pid = fork();
-		/* FIX 2: fork failure returns -1, not 1 */
 		if (pid == -1)
 		{
 			perror("fork failed");
