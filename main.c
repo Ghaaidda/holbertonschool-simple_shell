@@ -14,7 +14,6 @@
 *
 * Return: 0 on success, 1 on failure
 */
-
 int main(int argc, char *argv[], char **envp)
 {
 	char *lineptr = NULL;
@@ -40,9 +39,9 @@ int main(int argc, char *argv[], char **envp)
 		}
 
 		if (command > 0 && lineptr[command - 1] == '\n')
-       		}
-            		lineptr[command - 1] = '\0';
-        	}
+		{
+			lineptr[command - 1] = '\0';
+		}
 	
 		if (lineptr[0] == '\0')
 			continue;
@@ -52,8 +51,10 @@ int main(int argc, char *argv[], char **envp)
 		c_argv[1] = NULL;
 
 		pid = fork();
-		if (pid == 1)
+		/* FIX 2: fork failure returns -1, not 1 */
+		if (pid == -1)
 		{
+			perror("fork failed");
 			free(lineptr);
 			return (EXIT_FAILURE);
 		}
@@ -62,14 +63,17 @@ int main(int argc, char *argv[], char **envp)
 		{
 			if (execve(c_argv[0], c_argv, envp) == -1)
 			{
-				printf("./shell: No such file or directory\n");
+				fprintf(stderr, "%s: 1: %s: not found\n", argv[0], lineptr);
 				free(lineptr);
-                		exit(127);
+				exit(127);
 			}
 		}
 		else
+		{
 			wait(&status);
+		}
 	}
 	free(lineptr);
 	return (EXIT_SUCCESS);
 }
+
