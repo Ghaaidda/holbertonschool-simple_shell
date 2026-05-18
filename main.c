@@ -22,6 +22,7 @@ int main(int argc, char *argv[], char **envp)
 	pid_t pid;
 	int status;
 	char *c_argv[2];
+	ssize_t i; 
 	(void)argc;
 
 	while (1)
@@ -42,6 +43,14 @@ int main(int argc, char *argv[], char **envp)
 		if (command > 0 && lineptr[command - 1] == '\n')
 		{
 			lineptr[command - 1] = '\0';
+			command--;
+		}
+
+		i = command - 1;
+		while (i >= 0 && (lineptr[i] == ' ' || lineptr[i] == '\t'))
+		{
+			lineptr[i] = '\0';
+			i--;
 		}
 	
 		if (lineptr[0] == '\0')
