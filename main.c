@@ -7,56 +7,72 @@
 #include <sys/wait.h>
 
 /**
-* main - shell process entry point
-* @argc: number of shell program arguments
-* @argv: shell program arguments
-* @envp: shell program environment variables
-*
-* Return: 0 on success, 1 on failure
-*/
+ * main - shell process entry point
+ * @argc: number of shell program arguments
+ * @argv: shell program arguments
+ * @envp: shell program environment variables
+ *
+ * Return: 0 on success, 1 on failure
+ */
 int main(int argc, char *argv[], char **envp)
 {
 	char *lineptr = NULL;
 	size_t len = 0;
-	ssize_t command;
+	ssize_t nread;
 	pid_t pid;
 	int status;
 	char *c_argv[2];
-	ssize_t i; 
+	char *cmd_ptr;
+	size_t j;
 	(void)argc;
 
 	while (1)
 	{
+		/* interactive mode */
 		if (isatty(STDIN_FILENO))
 		{
 			printf("$ ");
-			fflush(stdout);
+			fflush(stdout); /* skip stdout buffer */
 		}
 
-		command = getline(&lineptr, &len, stdin);
-		if (command == -1)
+		/* read user input */
+		nread = getline(&lineptr, &len, stdin);
+		if (nread == -1)
 		{
 			free(lineptr);
 			return (EXIT_SUCCESS);
 		}
 
-		if (command > 0 && lineptr[command - 1] == '\n')
+		/* preprosessing: remove trailing newline */
+		if (nread > 0 && lineptr[nread - 1] == '\n')
 		{
-			lineptr[command - 1] = '\0';
-			command--;
+			lineptr[nread - 1] = '\0';
 		}
 
-		i = command - 1;
-		while (i >= 0 && (lineptr[i] == ' ' || lineptr[i] == '\t'))
+		/* alias pointer to protect original allocation */
+		cmd_ptr = lineptr;
+
+		/* skip leading spaces and tabs */
+		while (*cmd_ptr == ' ' || *cmd_ptr == '\t')
 		{
-			lineptr[i] = '\0';
-			i--;
+			cmd_ptr++;
 		}
-	
-		if (lineptr[0] == '\0')
+
+		/* if line was entirely empty or spaces, loop back */
+		if (*cmd_ptr == '\0')
 			continue;
 
-		c_argv[0] = lineptr;
+		/* find the end of a command */
+		j = 0;
+		while (cmd_ptr[j] != ' ' && cmd_ptr[j] != '\t' && cmd_ptr[j] != '\0')
+		{
+			j++;
+		}
+
+		cmd_ptr[j] = '\0';
+
+		/* child process creation*/
+		c_argv[0] = cmd_ptr;
 		c_argv[1] = NULL;
 
 		pid = fork();
@@ -71,17 +87,19 @@ int main(int argc, char *argv[], char **envp)
 		{
 			if (execve(c_argv[0], c_argv, envp) == -1)
 			{
-				fprintf(stderr, "%s: 1: %s: not found\n", argv[0], lineptr);
+				fprintf(stderr, "%s: 1: %s: not found\n", argv[0], cmd_ptr);
 				free(lineptr);
 				exit(127);
 			}
 		}
 		else
 		{
+			/* parent process waiting */
 			wait(&status);
 		}
 	}
+
+	/* no memory leaks */
 	free(lineptr);
 	return (EXIT_SUCCESS);
 }
-
