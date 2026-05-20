@@ -30,6 +30,7 @@ int main(int argc, char *argv[], char **envp)
 	int status;
 	char *c_argv[2];
 	char *cmd_ptr;
+	char *env_ptr;
 	int i;
 	int maxargs = 64;
 	char *delim = " \t\r\n\a";
