@@ -33,7 +33,6 @@ int main(int argc, char *argv[], char **envp)
 	int i;
 	int maxargs = 64;
 	char *delim = " \t\r\n\a";
-	size_t j;
 	char *token = NULL;
 	(void)argc;
 
