@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+
 char *tok_line(char *c){
 	char *line = c;
 	char *token;
@@ -30,11 +31,11 @@ int main(int argc, char *argv[], char **envp)
 	int status;
 	char *c_argv[2];
 	char *cmd_ptr;
-	char *env_ptr;
 	int i;
 	int maxargs = 64;
 	char *delim = " \t\r\n\a";
 	char *token = NULL;
+	char *fullcommand;
 	(void)argc;
 
 	while (1)
@@ -89,20 +90,29 @@ int main(int argc, char *argv[], char **envp)
 		if (c_argv[0] == NULL)
 			continue;
 
+		fullcommand = find_path(c_argv[0], envp);
+		if (fullcommand == NULL)
+		{
+			fprintf(stderr, "%s: 1: %s: not found\n", argv[0], c_argv[0]);
+			continue;
+		}
+
 		/* child process creation*/
 		pid = fork();
 		if (pid == -1)
 		{
 			perror("fork failed");
+			free(fullcommand);
 			free(lineptr);
 			return (EXIT_FAILURE);
 		}
 
 		if (pid == 0)
 		{
-			if (execve(c_argv[0], c_argv, envp) == -1)
+			if (execve(fullcommand, c_argv, envp) == -1)
 			{
 				fprintf(stderr, "%s: 1: %s: not found\n", argv[0], cmd_ptr);
+				free(fullcommand);
 				free(lineptr);
 				exit(127);
 			}
@@ -111,6 +121,7 @@ int main(int argc, char *argv[], char **envp)
 		{
 			/* parent process waiting */
 			wait(&status);
+			free(fullcommand);
 		}
 	}
 
