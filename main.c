@@ -6,6 +6,13 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+char *tok_line(char *c){
+	char *line = c;
+	char *token;
+	
+	token = strtok(line, " ");
+	return(token);
+}
 /**
  * main - shell process entry point
  * @argc: number of shell program arguments
@@ -23,7 +30,11 @@ int main(int argc, char *argv[], char **envp)
 	int status;
 	char *c_argv[2];
 	char *cmd_ptr;
+	int i;
+	int maxargs = 64;
+	char *delim = " \t\r\n\a";
 	size_t j;
+	char *token = NULL;
 	(void)argc;
 
 	while (1)
@@ -63,18 +74,22 @@ int main(int argc, char *argv[], char **envp)
 			continue;
 
 		/* find the end of a command */
-		j = 0;
-		while (cmd_ptr[j] != ' ' && cmd_ptr[j] != '\t' && cmd_ptr[j] != '\0')
+		token = tok_line(cmd_ptr);
+
+		i = 0;
+		while (token !=  NULL && i < maxargs - 1)
 		{
-			j++;
+			c_argv[i] = token;
+			i++;
+			token = strtok(NULL, delim);
 		}
 
-		cmd_ptr[j] = '\0';
+		c_argv[i] = NULL;
+
+		if (c_argv[0] == NULL)
+			continue;
 
 		/* child process creation*/
-		c_argv[0] = cmd_ptr;
-		c_argv[1] = NULL;
-
 		pid = fork();
 		if (pid == -1)
 		{
