@@ -41,7 +41,8 @@ char *find_path(char *command, char **envp)
 	/* handle if PATH doesnt exits or its empty */
 	if (path == NULL || *path == '\0')
 	{
-		if (access(command, X_OK) == 0)
+		/* only execute if its an explicit path */
+		if (strchr(command, '/') != NULL && access(command, X_OK) == 0)
 			return (strdup(command));
 		return (NULL);
 	}
