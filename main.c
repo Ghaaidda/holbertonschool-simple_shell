@@ -1,119 +1,110 @@
 #include "simpleshell.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 
-char *tok_line(char *c){
-	char *line = c;
-	char *token;
-	
-	token = strtok(line, " ");
-	return(token);
-}
 /**
  * main - shell process entry point
- * @argc: number of shell program arguments
- * @argv: shell program arguments
- * @envp: shell program environment variables
+ * @argc: number of shell process arguments
+ * @argv: shell process arguments
+ * @envp: environment variables
  *
- * Return: 0 on success, 1 on failure
+ * Return: 0 on success, exit code on failure
  */
-int main(int argc, char *argv[], char **envp)
+int main(int argc, char **argv, char **envp)
 {
-	char *lineptr = NULL;
-	size_t len = 0;
-	ssize_t nread;
+	char *lineptr = NULL, *fullcommand = NULL, *token;
+	size_t n = 0;
+	ssize_t nchars_read;
+	char *c_argv[1024];
+	int i, status, exit_status = 0;
 	pid_t pid;
-	int status;
-	char *c_argv[2];
-	char *cmd_ptr;
-	int i;
-	int maxargs = 64;
-	char *delim = " \t\r\n\a";
-	char *token = NULL;
+
 	(void)argc;
 
 	while (1)
 	{
-		/* interactive mode */
+		/* interactive prompt */
 		if (isatty(STDIN_FILENO))
-		{
-			printf("$ ");
-			fflush(stdout); /* skip stdout buffer */
-		}
+			write(STDOUT_FILENO, "$ ", 2);
 
-		/* read user input */
-		nread = getline(&lineptr, &len, stdin);
-		if (nread == -1)
+		nchars_read = getline(&lineptr, &n, stdin);
+		if (nchars_read == -1) /* Handle EOF (Ctrl+D) */
 		{
 			free(lineptr);
-			return (EXIT_SUCCESS);
+			exit(exit_status);
 		}
 
-		/* preprosessing: remove trailing newline */
-		if (nread > 0 && lineptr[nread - 1] == '\n')
-		{
-			lineptr[nread - 1] = '\0';
-		}
+		/* remove trailing newline character */
+		if (nchars_read > 0 && lineptr[nchars_read - 1] == '\n')
+			lineptr[nchars_read - 1] = '\0';
 
-		/* alias pointer to protect original allocation */
-		cmd_ptr = lineptr;
-
-		/* skip leading spaces and tabs */
-		while (*cmd_ptr == ' ' || *cmd_ptr == '\t')
-		{
-			cmd_ptr++;
-		}
-
-		/* if line was entirely empty or spaces, loop back */
-		if (*cmd_ptr == '\0')
-			continue;
-
-		/* find the end of a command */
-		token = tok_line(cmd_ptr);
-
+		/* tokenize command*/
 		i = 0;
-		while (token !=  NULL && i < maxargs - 1)
+		token = strtok(lineptr, " \t\r\n\a");
+		while (token != NULL && i < 1023)
 		{
 			c_argv[i] = token;
+			token = strtok(NULL, " \t\r\n\a");
 			i++;
-			token = strtok(NULL, delim);
 		}
-
 		c_argv[i] = NULL;
 
 		if (c_argv[0] == NULL)
 			continue;
 
-		/* child process creation*/
+		/* handle exit built-in */
+		if (strcmp(c_argv[0], "exit") == 0)
+		{
+			free(lineptr);
+			exit(exit_status);
+		}
+
+		/* handle env built-in */
+		if (strcmp(c_argv[0], "env") == 0)
+		{
+			for (i = 0; envp[i] != NULL; i++)
+			{
+				printf("%s\n", envp[i]);
+			}
+			continue;
+		}
+
+		/* full path commands handeling logic */
+		fullcommand = find_path(c_argv[0], envp);
+		if (fullcommand == NULL)
+		{
+			fprintf(stderr, "%s: 1: %s: not found\n", argv[0], c_argv[0]);
+			exit_status = 127;
+			continue;
+		}
+
+		/* child process creation */
 		pid = fork();
 		if (pid == -1)
 		{
 			perror("fork failed");
+			free(fullcommand);
 			free(lineptr);
 			return (EXIT_FAILURE);
 		}
 
 		if (pid == 0)
 		{
-			if (execve(c_argv[0], c_argv, envp) == -1)
+			if (execve(fullcommand, c_argv, envp) == -1)
 			{
-				fprintf(stderr, "%s: 1: %s: not found\n", argv[0], cmd_ptr);
+				fprintf(stderr, "%s: 1: %s: not found\n", argv[0], c_argv[0]);
+				free(fullcommand);
 				free(lineptr);
 				exit(127);
 			}
 		}
 		else
 		{
-			/* parent process waiting */
 			wait(&status);
+			free(fullcommand);
+			if (WIFEXITED(status))
+				exit_status = WEXITSTATUS(status);
 		}
 	}
 
-	/* no memory leaks */
 	free(lineptr);
-	return (EXIT_SUCCESS);
+	return (exit_status);
 }
