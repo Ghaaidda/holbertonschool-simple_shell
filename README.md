@@ -1,6 +1,6 @@
 # Holberton School - Simple Shell Project
 
-This a basic command line interpreter it enables the user to excute UNIX commands.
+This is a basic command line interpreter that enables the user to excute UNIX commands.
 
 ## Compilation
 Clone the repo
