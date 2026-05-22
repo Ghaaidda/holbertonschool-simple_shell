@@ -4,33 +4,43 @@ This a basic command line interpreter it enables the user to excute UNIX command
 
 ## Compilation
 Clone the repo
-'''
-git clone https://github.com/Ghaaidda/holbertonschool-simple_shell
-'''
+
+`git clone https://github.com/Ghaaidda/holbertonschool-simple_shell`
+
+
 Go to shell directory
-'''
-cd holbertonschool-simple_shell
-'''
+
+`cd holbertonschool-simple_shell`
+
 Compile program with gcc
-'''
-gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o hsh
-'''
+
+`gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o hsh`
+
 Run the program
-'''
-./hsh
-'''
+
+`./hsh`
+
 ## Requirements
 - GCC Compiler (GNU Compiler Collection)
 ## Examples
-'''
+
+```
 $ ls
-AUTHORS		exec_command.c	hsh		read_command.c	simpleshell.h
-README.md	find_path.c	main.c		search_path.c	token_command.c
+
+AUTHORS         exec_command.c  hsh             read_command.c  simpleshell.h
+README.md       find_path.c     main.c          search_path.c   token_command.c
+```
+
+```
 $ which ls
 /bin/ls
+```
+```
 $ /bin/ls
-AUTHORS		exec_command.c	hsh		read_command.c	simpleshell.h
-README.md	find_path.c	main.c		search_path.c	token_command.c
+AUTHORS         exec_command.c  hsh             read_command.c  simpleshell.h
+README.md       find_path.c     main.c          search_path.c   token_command.c
+```
+```
 $ ls -l
 total 144
 -rw-r--r--  1 mcghaida  staff    137 May 22 15:24 AUTHORS
@@ -43,6 +53,9 @@ total 144
 -rw-r--r--  1 mcghaida  staff    828 May 22 15:24 search_path.c
 -rw-r--r--  1 mcghaida  staff    452 May 22 15:24 simpleshell.h
 -rw-r--r--  1 mcghaida  staff    490 May 22 15:24 token_command.c
-'''
-## Testing
-Passed all Holberton School tests.
+```
+## Authors
+Abdulwahab Almatrudi <auwa.mm@gmail.com>
+
+Ghaida Alsabti <alsabtighaida@gmail.com>
+
