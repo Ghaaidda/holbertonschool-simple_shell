@@ -1,5 +1,4 @@
 #include "simpleshell.h"
-
 /**
  * find_path - finds a command within the PATH environment variable
  * @command: command entered by user
@@ -9,10 +8,7 @@
  */
 char *find_path(char *command, char **envp)
 {
-	char *tokens;
 	char *path = NULL;
-	char *filepath;
-	char *pathcp;
 	int i;
 
 	if (command == NULL)
@@ -25,7 +21,6 @@ char *find_path(char *command, char **envp)
 			return (strdup(command));
 		return (NULL);
 	}
-
 	/* get PATH variable in the environment array */
 	i = 0;
 	while (envp[i] != NULL)
@@ -37,7 +32,6 @@ char *find_path(char *command, char **envp)
 		}
 		i++;
 	}
-
 	/* handle if PATH doesnt exits or its empty */
 	if (path == NULL || *path == '\0')
 	{
@@ -46,34 +40,5 @@ char *find_path(char *command, char **envp)
 			return (strdup(command));
 		return (NULL);
 	}
-
-	pathcp = strdup(path);
-	if (pathcp == NULL)
-		return (NULL);
-
-	tokens = strtok(pathcp, ":");
-	while (tokens != NULL)
-	{
-		/* allocate space for path + / + command + null */
-		filepath = malloc(strlen(tokens) + strlen(command) + 2);
-		if (filepath == NULL)
-		{
-			free(pathcp);
-			return (NULL);
-		}
-		strcpy(filepath, tokens);
-		strcat(filepath, "/");
-		strcat(filepath, command);
-
-		if (access(filepath, X_OK) == 0)
-		{
-			free(pathcp);
-			return (filepath);
-		}
-		free(filepath);
-		tokens = strtok(NULL, ":");
-	}
-
-	free(pathcp);
-	return (NULL);
+	return (search_path(command, path));
 }
