@@ -21,6 +21,7 @@ Run the program
 `./hsh`
 
 ## Requirements
+- OS: Ubuntu 20.04 LTS
 - GCC Compiler (GNU Compiler Collection)
 ## Examples
 
@@ -54,6 +55,13 @@ total 144
 -rw-r--r--  1 mcghaida  staff    452 May 22 15:24 simpleshell.h
 -rw-r--r--  1 mcghaida  staff    490 May 22 15:24 token_command.c
 ```
+
+## Man Page
+
+```
+man ./man_1_simple_shell
+```
+
 ## Authors
 Abdulwahab Almatrudi <auwa.mm@gmail.com>
 
