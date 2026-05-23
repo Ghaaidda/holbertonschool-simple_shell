@@ -1,0 +1,41 @@
+.TH HSH 1 "MAY 2026" "Holberton School Simple Shell" "User Commands"
+.SH NAME
+hsh \- simple shell command line interpreter
+.SH SYNOPSIS
+.B hsh
+.SH DESCRIPTION
+A basic UNIX command line interpreter that executes commands read from standard input.
+When running interactively, it prints a "\fC$\fR" prompt before each command.
+
+Input is tokenized using spaces and tabs. Commands are executed by forking a child
+process and calling execve(2). If the command contains no slash, hsh searches for
+it in the directories listed in the \fIPATH\fR environment variable. If not found, it prints:
+
+.RS
+.B $prg_name: 1: $command: not found
+.RE
+
+.SH BUILT-IN COMMANDS
+.TP
+.I exit
+Exits hsh with the stored exit status (initially 0, updated after each command).
+
+.TP
+.I env
+Prints all environment variables to standard output, one per line.
+
+.SH ENVIRONMENT
+.TP
+.I PATH
+Colon-separated list of directories searched for commands when no slash is present in the command name. If \fIPATH\fR is unset or empty and no explicit path is given, the command is considered not found.
+
+.SH EXIT STATUS
+Returns 0 on normal startup and EOF (Ctrl+D). After each executed external command, it stores that command's exit status and uses it when exiting later.
+
+.SH SEE ALSO
+fork(2), execve(2), wait(2), access(2), getline(3)
+
+.SH AUTHORS
+Ghaida Alsabti <alsabtighaida@gmail.com>
+.br
+Abdulwahab Almatrudi <auwa.mm@gmail.com>
